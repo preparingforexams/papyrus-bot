@@ -1,4 +1,4 @@
-namespace: telegram-bots
+namespace: papyrus
 
 deployment:
   name: papyrusbot
