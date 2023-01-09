@@ -21,10 +21,23 @@ class Chat(ChatBase):
 class ItemBase(BaseModel):
     name: str
     description: Optional[str]
+    done: bool = False
 
 
 class ItemCreate(BaseModel):
     item: ItemBase
+
+
+class ItemUpdateChangeset(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+    description: Optional[str]
+    done: Optional[bool]
+
+
+class ItemUpdate(BaseModel):
+    id: int
+    item: ItemUpdateChangeset
 
 
 class Item(ItemBase):

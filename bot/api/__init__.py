@@ -54,6 +54,18 @@ def post(endpoint: Endpoint, data: Dict, headers: Dict = None) -> requests.Respo
     return requests.post(url, data=data, headers=headers)
 
 
+def put(endpoint: Endpoint, data: Dict, headers: Dict = None) -> requests.Response:
+    if not headers:
+        headers = {}
+    if "Content-Type" not in headers.keys():
+        headers.update({"Content-Type": "application/json"})
+
+    url = "/".join([API_BASE_URL, API_BASE_PATH, endpoint.value])
+
+    data = json.dumps(data)
+    return requests.put(url, data=data, headers=headers)
+
+
 # noinspection DuplicatedCode
 def create_item(item: models.ItemBase) -> models.Item:
     log = create_logger(inspect.currentframe().f_code.co_name)
@@ -89,7 +101,7 @@ def create_chat(chat: models.ChatBase) -> Optional[models.Chat]:
     return models.Chat.parse_obj(response.json()["data"])
 
 
-def get_items():
+def get_items() -> models.ItemResponse:
     log = create_logger(inspect.currentframe().f_code.co_name)
 
     response = get(Endpoint.ITEM)
@@ -98,3 +110,31 @@ def get_items():
         raise ApiException(response)
 
     return models.ItemResponse.parse_obj(response.json())
+
+
+def find_item_by_name(name: str) -> Optional[models.Item]:
+    items = get_items()
+    for item in items.data:
+        if item.name.lower() == name.lower():
+            return item
+
+    return None
+
+
+def mark_as_done(item: models.Item) -> models.ItemResponse:
+    log = create_logger(inspect.currentframe().f_code.co_name)
+
+    update = models.ItemUpdate.parse_obj({
+        "id": item.id,
+        "item": {
+            "done": True
+        }
+    })
+
+    response = put(Endpoint.ITEM, update.dict(exclude_unset=True))
+    if not response.ok:
+        log.error(f"response nok for `api#mark_as_done`\n\t[{response.status_code}]: {response.text}")
+        raise ApiException(response)
+
+    print(response.json())
+    return models.Item.parse_obj(response.json()["data"])

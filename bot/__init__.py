@@ -64,9 +64,30 @@ async def items(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         # noinspection PyShadowingNames
         items = api.get_items()
-        message = "\n".join([escape_markdown(item.name) for item in items.data])
+        message = "\n".join([escape_markdown(item.name) for item in items.data if not item.done])
     except ApiException as e:
         log.exception("failed to retrieve items", exc_info=True)
+        message = str(e)
+
+    return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
+async def done(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    log = create_logger(inspect.currentframe().f_code.co_name)
+    if not any(a for a in context.args):
+        log.error("no argument has been passed to `/done`")
+        return await update.effective_message.reply_text("...")
+    name = " ".join(context.args)
+
+    try:
+        item = api.find_item_by_name(name)
+        if not item:
+            message = f"couldn't find item named `{name}`"
+        else:
+            api.mark_as_done(item)
+            message = f"marked `{name}` as done"
+    except ApiException as e:
+        log.exception("failed to retrieve items or marking item as done", exc_info=True)
         message = str(e)
 
     return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
