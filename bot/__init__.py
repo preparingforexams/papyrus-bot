@@ -10,10 +10,6 @@ from .helper import escape_markdown
 from .logger import create_logger
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    log = create_logger(inspect.currentframe().f_code.co_name)
-
-
 async def add_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log = create_logger(inspect.currentframe().f_code.co_name)
     if not any(a for a in context.args):
