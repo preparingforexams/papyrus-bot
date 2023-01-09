@@ -24,6 +24,7 @@ def main():
 
     application.add_handler(telegram.ext.CommandHandler("start", bot.start))
     application.add_handler(telegram.ext.CommandHandler("add", bot.add_item))
+    application.add_handler(telegram.ext.CommandHandler("add_batch", bot.add_batch))
     application.add_handler(telegram.ext.CommandHandler("items", bot.items))
 
     application.run_polling()

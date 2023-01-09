@@ -34,6 +34,31 @@ async def add_item(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
 
 
+async def add_batch(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    log = create_logger(inspect.currentframe().f_code.co_name)
+    if not any(a for a in context.args):
+        log.error("no argument has been passed to `/addbatch`")
+        return await update.effective_message.reply_text("...")
+
+    text = " ".join(context.args)
+    batch_items = [name.strip() for name in text.split(";")]
+
+    messages = []
+    for name in batch_items:
+        item_base = api.models.ItemBase.parse_obj({
+            "name": name,
+            "description": "",
+        })
+        try:
+            item = api.create_item(item_base)
+            messages.append(f"Added {str(item)}")
+        except ApiException as e:
+            messages.append(str(e))
+
+    message = "\n".join(messages)
+    return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
 async def items(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log = create_logger(inspect.currentframe().f_code.co_name)
     try:
