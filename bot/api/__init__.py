@@ -88,11 +88,15 @@ def create_item(item: models.ItemBase) -> models.Item:
 def create_chat(chat: models.ChatBase) -> Optional[models.Chat]:
     log = create_logger(inspect.currentframe().f_code.co_name)
 
+    chat = models.ChatCreate.parse_obj({
+        "chat": {
+            "id": chat.id,
+            "name": chat.name,
+        },
+    })
     response = post(
         Endpoint.CHAT,
-        models.ChatCreate.parse_obj({
-            "chat": chat,
-        }).dict()
+        chat.dict()
     )
     if not response.ok:
         log.error(f"response nok for `api#add_chat`\n\t[{response.status_code}]: {response.text}")

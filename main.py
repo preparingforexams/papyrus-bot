@@ -22,10 +22,15 @@ def main():
     bot_token = get_bot_token_or_die()
     application = ApplicationBuilder().token(bot_token).build()
 
+    application.add_handler(telegram.ext.CommandHandler("start", bot.start))
     application.add_handler(telegram.ext.CommandHandler("add", bot.add_item))
     application.add_handler(telegram.ext.CommandHandler("add_batch", bot.add_batch))
     application.add_handler(telegram.ext.CommandHandler("items", bot.items))
     application.add_handler(telegram.ext.CommandHandler("done", bot.done))
+    application.add_handler(
+        telegram.ext.MessageHandler(telegram.ext.filters.StatusUpdate.CHAT_CREATED, bot.chat_created))
+    application.add_handler(
+        telegram.ext.MessageHandler(telegram.ext.filters.StatusUpdate.NEW_CHAT_MEMBERS, bot.new_member))
 
     application.run_polling()
 

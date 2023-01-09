@@ -87,3 +87,37 @@ async def done(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = str(e)
 
     return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
+def add_chat(update: Update) -> Optional[str]:
+    log = create_logger(inspect.currentframe().f_code.co_name)
+    title = update.effective_message.new_chat_title or update.effective_chat.title or update.effective_chat.first_name
+
+    chat = api.models.ChatBase.parse_obj({
+        "id": update.effective_chat.id,
+        "name": title,
+    })
+
+    try:
+        # noinspection PyShadowingNames
+        api.create_chat(chat)
+    except ApiException as e:
+        log.exception("failed to retrieve items", exc_info=True)
+        return str(e)
+    except requests.exceptions.ConnectionError as e:
+        return escape_markdown(str(e))[:4000]
+
+
+async def chat_created(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if message := add_chat(update):
+        return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
+async def new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if message := add_chat(update):
+        return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if message := add_chat(update):
+        return await update.effective_message.reply_text(message, parse_mode=telegram.constants.ParseMode.MARKDOWN_V2)

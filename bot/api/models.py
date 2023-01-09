@@ -10,12 +10,23 @@ class ChatBase(BaseModel):
     name: str
 
 
-class ChatCreate(ChatBase):
+class ChatCreate(BaseModel):
     chat: ChatBase
 
 
 class Chat(ChatBase):
-    pass
+    def __str__(self):
+        return escape_markdown(f"{self.name}")
+
+
+class ChatUpdateChangeset(BaseModel):
+    id: Optional[int]
+    name: Optional[str]
+
+
+class ChatUpdate:
+    id: int
+    chat: ChatUpdateChangeset
 
 
 class ItemBase(BaseModel):
