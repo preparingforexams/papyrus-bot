@@ -20,7 +20,10 @@ class ApiException(Exception):
     def __str__(self):
         s = "failure\n```\n"
         if isinstance(self.args[0], requests.Response):
-            s += escape_markdown(json.dumps(self.args[0].json()['errors'], indent=2))
+            try:
+                s += escape_markdown(json.dumps(self.args[0].json()['errors'], indent=2))
+            except TypeError:
+                s = escape_markdown("\n".join(self.args))[:4000]  # simply cut off error message in case of HTML content
         else:
             s = escape_markdown("\n".join(self.args))[:4000]  # simply cut off error message in case of HTML content
         s += "\n```"
