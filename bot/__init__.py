@@ -1,4 +1,5 @@
 import inspect
+from typing import Optional
 
 import telegram.constants
 from telegram import Update
